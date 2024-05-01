@@ -5,9 +5,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import Card from '../ui/Card';
 function Homepage(){
-
-    const [signedIn, setSignedIn] = useState(true);
-
+    const [signedIn, setSignedIn] = useState(false);
     const [links, setLinks] = useState([
         "Gesundheit & Ernährung",
         "Schlaf",
@@ -21,6 +19,7 @@ function Homepage(){
 
     const [posts, setPosts] = useState([
         {
+            category: "Gesundheit & Ernährung",
             img: "/images/img1.png",
             title: "Die Reise des kleinen Wunders",
             description: "Ein Leitfaden für die Gesundheit eures Kindes",
@@ -49,16 +48,16 @@ function Homepage(){
                     <div className={classes.button}>
                     Eigenen Beitrag veröffentlichen
                 </div></Link> : <div className={classes.sign}>
-                    <div className={classes.signup}>Sign Up</div>
+                    <Link href={"/login"}><div className={classes.signup}>Sign Up</div></Link>
                     <div className={classes.sep}>OR</div>
-                    <div className={classes.signin}>Log in</div>
+                    <Link href={"/signup"}><div className={classes.signin}>Log in</div></Link>
                 </div>}
             </div>
             <div className={classes.content}>
                 <div className={classes.title}>{selectedLink}</div>
                 <div className={classes.grid}>
                     {posts.map((post, index) => {
-                        return <Card key={index} img={post.img} title={post.title} description={post.description} content={post.content} />
+                        return post.category == selectedLink && <Card key={index} img={post.img} title={post.title} description={post.description} content={post.content} />
                     })}
                 </div>
             </div>

@@ -3,7 +3,7 @@ import classes from './Card.module.css';
 import Image from 'next/image';
 function Card({ img, title, description, content }){
 
-    const [modalIsOpen, setModalIsOpen] = useState(true);
+    const [modalIsOpen, setModalIsOpen] = useState(false);
 
     return (
         <>

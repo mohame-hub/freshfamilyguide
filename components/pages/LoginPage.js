@@ -2,10 +2,34 @@ import classes from './SignupPage.module.css';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
+import { signIn } from "next-auth/react"
 function LoginPage(){
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+
+    async function handleSubmit(e){
+        e.preventDefault();
+        signIn("credentials", {
+            email: email,
+            password: password,
+            redirect: false,
+        })
+        const response = await fetch("/api/auth/register", {
+            method: "POST",
+            body: JSON.stringify({
+                email: email,
+                password: password,
+            }),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+        if (response.ok) {
+            router.replace("/");
+        }
+    }
 
     return (
         <div className={classes.container}>
@@ -18,14 +42,15 @@ function LoginPage(){
                 <div className={classes.title}>where families find guidance!</div>
                 <div className={classes.access}>Log in to access more features!</div>
             </div>
-            <div className={classes.right}>
+            <form onSubmit={handleSubmit} className={classes.right}>
                 <div className={classes.big_title}>Log in</div>
                 <div className={classes.sep}></div>
                 <input type='email' value={email} onChange={(e) => setEmail(e.target.value)} className={classes.input} placeholder='Email'/>
                 <input type='password' value={password} onChange={(e) => setPassword(e.target.value)} className={classes.input} placeholder='Password' />
-                <div className={classes.button}>Log in</div>
+                <div>{error}</div>
+                <button className={classes.button}>Log in</button>
                 <div className={classes.redirection}>Dont have an account? <Link href={"/signup"}><span className={classes.link}>Register</span></Link></div>
-            </div>
+            </form>
         </div>
     )
 } export default LoginPage;

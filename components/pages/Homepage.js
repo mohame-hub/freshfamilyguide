@@ -1,34 +1,39 @@
-import classes from './Hompage.module.css';
-import Header from '../ui/Header';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
 import Card from '../ui/Card';
-function Homepage(){
-    const [signedIn, setSignedIn] = useState(false);
-    const [links, setLinks] = useState([
+import { signIn, signOut, useSession } from 'next-auth/react';
+import classes from './Hompage.module.css';
+import axios from 'axios';
+import Logout from '@/pages/logout';
+
+function Homepage() {
+    const {data: session} = useSession();
+    const signedin = session?.user;
+    const [links] = useState([
         "Gesundheit & Ernährung",
         "Schlaf",
         "Sicherheit",
         "Hygiene",
         "Lernspielzeuge",
         "Unterhaltung für Kinder/Babies",
-    ])
+    ]);
+    const [selectedLink, setSelectedLink] = useState(links[0]);
+    const [posts, setPosts] = useState([]);
 
-    const [selectedLink, setSelectedLink] = useState(links[0])
-
-    const [posts, setPosts] = useState([
-        {
-            category: "Gesundheit & Ernährung",
-            img: "/images/img1.png",
-            title: "Die Reise des kleinen Wunders",
-            description: "Ein Leitfaden für die Gesundheit eures Kindes",
-            content: `In der Welt der Ernährung gilt Reis als eines der vielseitigsten und nahrhaftesten Lebensmittel. Seit Jahrhunderten wird Reis in verschiedenen Kulturen auf der ganzen Welt angebaut und genossen. Hier sind einige zufällig generierte Vorteile von Reis:
-            Ernährungsreichtum: Reis ist reich an Kohlenhydraten, die eine wichtige Energiequelle für den Körper darstellen. Darüber hinaus enthält er auch Proteine, Ballaststoffe und wichtige Vitamine und Mineralien wie Vitamin B, Eisen und Magnesium.
-            Leichte Verdaulichkeit: Reis ist leicht verdaulich und eignet sich daher gut für Menschen mit empfindlichem Magen oder Verdauungsproblemen. Es ist auch ein beliebtes Nahrungsmittel für Babys und Kleinkinder.
-            Glutenfrei: Im Gegensatz zu Getreidesorten wie Weizen ist Reis von Natur aus glutenfrei, was es zu einer hervorragenden Wahl für Menschen mit Zöliakie oder Glutenunverträglichkeit macht.`
+    useEffect(() => {
+        async function fetchPosts() {
+            try {
+                const response = await axios.get('/api/auth/getposts'); // Make GET request to fetch posts
+                setPosts(response.data); // Set posts state with data from response
+            } catch (error) {
+                console.error('Error fetching posts:', error);
+            }
         }
-    ])
+
+        fetchPosts(); // Call the fetchPosts function when the component mounts
+    }, []); // Empty dependency array ensures the effect runs only once after initial render
+    console.log(signedin)
 
     return (
         <div className={classes.container}>
@@ -37,30 +42,47 @@ function Homepage(){
                     <Image src={"/ui_images/logo.png"} alt='Logo' fill/>
                 </div>
                 <div className={classes.links}>
-                    <div className={`${classes.link} ${selectedLink == links[0] && classes.selected_link}`} onClick={() => setSelectedLink(links[0])}>Gesundheit & Ernährung</div>
-                    <div className={`${classes.link} ${selectedLink == links[1]  && classes.selected_link}`} onClick={() => setSelectedLink(links[1])}>Schlaf</div>
-                    <div className={`${classes.link} ${selectedLink == links[2] && classes.selected_link}`} onClick={() => setSelectedLink(links[2])}>Sicherheit</div>
-                    <div className={`${classes.link} ${selectedLink == links[3] && classes.selected_link}`} onClick={() => setSelectedLink(links[3])}>Hygiene</div>
-                    <div className={`${classes.link} ${selectedLink == links[4] && classes.selected_link}`} onClick={() => setSelectedLink(links[4])}>Lernspielzeuge</div>
-                    <div className={`${classes.link} ${selectedLink == links[5] && classes.selected_link}`} onClick={() => setSelectedLink(links[5])}>Unterhaltung für Kinder/Babies</div>
+                    {links.map((link, index) => (
+                        <div
+                            key={index}
+                            className={`${classes.link} ${selectedLink === link && classes.selected_link}`}
+                            onClick={() => setSelectedLink(link)}
+                        >
+                            {link}
+                        </div>
+                    ))}
                 </div>
-                {signedIn ? <Link href={"create_post"}>
-                    <div className={classes.button}>
-                    Eigenen Beitrag veröffentlichen
-                </div></Link> : <div className={classes.sign}>
-                    <Link href={"/login"}><div className={classes.signup}>Sign Up</div></Link>
-                    <div className={classes.sep}>OR</div>
-                    <Link href={"/signup"}><div className={classes.signin}>Log in</div></Link>
-                </div>}
+                {signedin ? (
+                    <>
+                    <div className={classes.flex}>
+                        <Link href={"create_post"}>
+                        <div className={classes.button}>Eigenen Beitrag veröffentlichen</div>
+                        </Link>
+                        <button onClick={() => signOut()}>Sign Out</button>
+                    </div>
+                    </>
+                ) : (
+                    <div className={classes.sign}>
+                        <Link href={"/signup"}>
+                            <div className={classes.signup}>Sign Up</div>
+                        </Link>
+                        <div className={classes.sep}>OR</div>
+                        <Link href={"/login"}>
+                            <div className={classes.signin} onClick={() => signIn()}>Log in</div>
+                        </Link>
+                    </div>
+                )}
             </div>
             <div className={classes.content}>
                 <div className={classes.title}>{selectedLink}</div>
                 <div className={classes.grid}>
-                    {posts.map((post, index) => {
-                        return post.category == selectedLink && <Card key={index} img={post.img} title={post.title} description={post.description} content={post.content} />
-                    })}
+                    {posts.map((post, index) => (
+                        post.category === selectedLink && <div key={index} className={classes.grid_item}><Card  img={post.imageLink} title={post.title} description={post.description} content={post.text} /></div>
+                    ))}
                 </div>
             </div>
         </div>
-    )
-} export default Homepage;
+    );
+}
+
+export default Homepage;

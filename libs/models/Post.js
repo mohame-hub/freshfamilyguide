@@ -2,14 +2,10 @@
 import mongoose from 'mongoose';
 
 const postSchema = new mongoose.Schema({
-    firstname: {
-        type: String,
-        required: true
-    },
-    lastname: {
-        type: String,
-        required: true
-    },
+  category: {
+    type: String,
+    required: true,
+  },
   title: {
     type: String,
     required: true

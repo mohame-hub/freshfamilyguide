@@ -3,32 +3,27 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import { signIn } from "next-auth/react"
+import { useRouter } from 'next/navigation';
 function LoginPage(){
-
+    const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
     async function handleSubmit(e){
         e.preventDefault();
-        signIn("credentials", {
-            email: email,
-            password: password,
-            redirect: false,
-        })
-        const response = await fetch("/api/auth/register", {
-            method: "POST",
-            body: JSON.stringify({
+        try {
+            const res = signIn("credentials", {
                 email: email,
                 password: password,
-            }),
-            headers: {
-                "Content-Type": "application/json"
-            }
-        });
-        if (response.ok) {
-            router.replace("/");
+                redirect: false, 
+            })
+            console.log(res);
+            router.replace("/")
+        } catch (error) {
+            console.log(error)
         }
+   
     }
 
     return (

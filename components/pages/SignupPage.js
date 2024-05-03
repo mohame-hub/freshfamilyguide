@@ -16,24 +16,45 @@ function SignupPage() {
 
     async function handleSubmit(e) {
         e.preventDefault();
-        if (createPassword !== confirmPassword) {
-            setError("Passwords do not match");
-            return;
-        }
-        const response = await fetch("/api/auth/register", {
-            method: "POST",
-            body: JSON.stringify({
-                firstname: firstName,
-                lastname: lastName, 
-                email: email,
-                password: createPassword,
-            }),
-            headers: {
-                "Content-Type": "application/json"
+        try{
+            if (createPassword !== confirmPassword) {
+                setError("Passwords do not match");
+                return;
             }
-        });
-        if (response.ok) {
-            router.replace("/login");
+            const response = await fetch("/api/signup", {
+                method: "POST",
+                body: JSON.stringify({
+                    firstname: firstName,
+                    lastname: lastName, 
+                    email: email,
+                    password: createPassword,
+                }),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+            if (response.ok) {
+                router.replace("/login");
+            }
+            const logged = await fetch("/api/approve_login/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ email }),
+                //  credentials: "include",
+            });
+            const { db_data } = await logged.json();
+            console.log(db_data);
+            if (db_data) {
+                console.log("User already exists..");
+                setError("User already exists...");
+                return;
+            }
+            router.replace("/");
+        } catch (err) {
+            console.error(err);
+            return NextResponse.json({ error: "ERROR! ", err });
         }
     }
 

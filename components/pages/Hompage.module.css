@@ -100,3 +100,20 @@
     font-weight: bold;
     color: #fff;
 }
+
+.grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Adjust the gap between grid items as needed */
+}
+
+.grid-item {
+    flex: 3 2 400px; /* Flex grow, flex shrink, flex basis */
+    max-width: 500px; /* Maximum width of grid item */
+    /* Additional styling for grid items */
+  }
+
+  .flex{
+    display: flex;
+    align-items: center;
+  }
